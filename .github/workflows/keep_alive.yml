@@ -2,8 +2,8 @@
 name: Supabase High Frequency Wake Up
 on:
   schedule:
-    # 每 20 分鐘執行一次 (分鐘 0, 15, 30, 45)
-    - cron: '*/20 * * * *'
+    # 每 15 分鐘執行一次 (分鐘 0, 15, 30, 45)
+    - cron: '*/15 * * * *'
   workflow_dispatch: # 允許手動測試
 
 jobs:
