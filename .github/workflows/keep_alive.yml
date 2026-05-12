@@ -5,32 +5,38 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 0 * * *' # 每天國際標準時間 00:00 自動執行
-  workflow_dispatch:      # 讓你可以手動點擊按鈕測試
+    - cron: '0 0 * * *' 
+  workflow_dispatch:      # 提供手動測試按鈕
 
 jobs:
   update:
     runs-on: ubuntu-latest
+    # 強制宣告權限，避免設定沒套用
     permissions:
-      contents: write     # 明確要求寫入權限
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 確保取得完整歷史記錄
 
       - name: Setup Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Make a small change to index.html
+      - name: Update index.html
         run: |
-          # 在 index.html 最後面加上一個隱藏的更新時間戳，確保檔案有變動
-          echo "<!-- Last Auto Update: $(date) -->" >> index.html
+          # 檢查 index.html 是否存在，並附加更新標籤
+          if [ -f index.html ]; then
+            echo "<!-- Refresh: $(date) -->" >> index.html
+          fi
 
       - name: Commit and Push
         run: |
-          git add .
-          git commit -m "Automated keep-alive update" || echo "No changes to commit"
-          git push
+          git add index.html
+          # 只有在有變動時才 commit，避免重複報錯
+          git commit -m "chore: nightly keep-alive update" || exit 0
+          git push origin main
 
 ```
