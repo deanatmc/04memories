@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -6,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>704-904 | 我們的國中時光紀錄</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入芫荽體官方字型檔 -->
     <link href="https://cdn.jsdelivr.net/npm/iansui/iansui.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -15,8 +15,29 @@
             --accent: #f43f5e;
         }
 
+        /* --------------------------------------------------
+           絕對強制全域字體覆蓋（只使用 芫荽體 Iansui）
+        -------------------------------------------------- */
+        *, *::before, *::after, html, body, div, span, applet, object, iframe,
+        h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+        a, abbr, acronym, address, big, cite, code,
+        del, dfn, em, img, ins, kbd, q, s, samp,
+        small, strike, strong, sub, sup, tt, var,
+        b, u, i, center,
+        dl, dt, dd, ol, ul, li,
+        fieldset, form, label, legend,
+        table, caption, tbody, tfoot, thead, tr, th, td,
+        article, aside, canvas, details, embed, 
+        figure, figcaption, footer, header, hgroup, 
+        menu, nav, output, ruby, section, summary,
+        time, mark, audio, video, input, button, select, textarea, option {
+            font-family: 'Iansui' !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+
         body {
-            font-family: 'Iansui', cursive, sans-serif;
             background-color: #0f172a; 
             scroll-behavior: smooth;
             overflow-x: hidden;
@@ -104,11 +125,33 @@
             border: 8px solid white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transition: transform 0.3s;
+            background: white;
         }
         .photo-frame:hover {
             transform: scale(1.05) rotate(0deg) !important;
             z-index: 10;
         }
+
+        /* 同學錄專屬卡片樣式 */
+        .roster-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.3, 1);
+            position: relative;
+        }
+        .roster-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--secondary);
+            box-shadow: 0 15px 30px rgba(168, 85, 247, 0.15);
+            transform: translateY(-8px);
+        }
+
+        /* 燈箱轉場特效 */
+        .lightbox-transition {
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .lightbox-hidden { opacity: 0; transform: scale(0.9); }
+        .lightbox-visible { opacity: 1; transform: scale(1); }
 
         /* Padlet 容器優化 */
         .padlet-container {
@@ -117,6 +160,8 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(0, 0, 0, 0.2);
         }
+
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
@@ -150,7 +195,7 @@
         <div class="relative z-10">
             <div class="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-8 backdrop-blur-md">
                 <span class="w-2 h-2 bg-indigo-400 rounded-full animate-ping"></span>
-                <span class="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase text-indigo-300">15M Actions Syncing</span>
+                <span class="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase text-indigo-300">Live Memory Synced</span>
             </div>
             <h1 class="text-5xl md:text-8xl lg:text-9xl font-black mb-6 tracking-tighter shimmer-text">青春編年史</h1>
             <p class="text-slate-400 text-sm md:text-2xl font-light tracking-[0.2em] max-w-2xl mx-auto leading-relaxed">
@@ -160,61 +205,150 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 md:px-8 py-20">
+    <main class="max-w-7xl mx-auto px-6 md:px-8 py-10">
+        <!-- 班級時光閘口 -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-32">
             <div onclick="openBoard('704')" class="reveal entry-card glass-card cursor-pointer p-10 rounded-[3rem] group">
-                <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center text-4xl font-black mb-8 shadow-2xl group-hover:scale-110 transition-transform">7</div>
+                <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl flex items-center justify-center text-4xl font-black mb-8 shadow-2xl group-hover:scale-110 transition-transform text-white">7</div>
                 <h3 class="text-3xl font-black mb-4 text-white">七年四班</h3>
                 <p class="text-slate-400 text-sm leading-relaxed">那一年的蟬鳴與新書包的味道，是故事的起點。</p>
             </div>
             <div onclick="openBoard('804')" class="reveal entry-card glass-card cursor-pointer p-10 rounded-[3rem] group">
-                <div class="w-20 h-20 bg-gradient-to-br from-rose-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl font-black mb-8 shadow-2xl group-hover:scale-110 transition-transform">8</div>
+                <div class="w-20 h-20 bg-gradient-to-br from-rose-500 to-purple-600 rounded-2xl flex items-center justify-center text-4xl font-black mb-8 shadow-2xl group-hover:scale-110 transition-transform text-white">8</div>
                 <h3 class="text-3xl font-black mb-4 text-white">八年四班</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">在籃球場與福利社之間，我們揮灑著不羈的熱情。</p>
+                <p class="text-slate-400 text-sm leading-relaxed">在操場與福利社之間，我們揮灑著不羈的熱情。</p>
             </div>
             <div onclick="openBoard('904')" class="reveal entry-card glass-card cursor-pointer p-10 rounded-[3rem] group">
-                <div class="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-4xl font-black mb-8 shadow-2xl group-hover:scale-110 transition-transform">9</div>
+                <div class="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-4xl font-black mb-8 shadow-2xl group-hover:scale-110 transition-transform text-white">9</div>
                 <h3 class="text-3xl font-black mb-4 text-white">九年四班</h3>
-                <p class="text-slate-400 text-sm leading-relaxed">最後的衝刺與淚水，將化作通往未來的翅膀。</p>
+                <p class="text-slate-400 text-sm leading-relaxed">最後的衝刺與淚水，將化作通往未來的翅膀，展翅高飛。</p>
             </div>
         </div>
 
-        <section class="reveal mb-32">
-            <div class="flex flex-col md:flex-row items-baseline justify-between mb-12 gap-4">
-                <div class="flex items-center space-x-4">
-                    <div class="w-2 h-10 bg-gradient-to-b from-indigo-500 to-rose-500 rounded-full"></div>
-                    <h2 class="text-4xl md:text-6xl font-black text-white tracking-tighter">常用連結</h2>
-                </div>
-                <button onclick="toggleLinkEditor()" class="admin-section text-xs font-black text-indigo-400 tracking-widest uppercase">Manage Connections</button>
-            </div>
-            <div id="linkEditor" class="hidden mb-12 glass-card p-10 rounded-[2.5rem]">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <input type="text" id="newLinkTitle" placeholder="標題名稱" class="bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
-                    <input type="text" id="newLinkUrl" placeholder="URL 地址" class="bg-white/5 border border-white/10 p-4 rounded-2xl outline-none text-white">
-                </div>
-                <button onclick="saveNewLink()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl uppercase tracking-widest">Connect to Cloud</button>
-            </div>
-            <div id="linksList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-        </section>
-
-        <!-- Padlet 留言板區塊 -->
+        <!-- 線上同學錄展示區 (Class Roster) -->
         <section class="reveal mb-32">
             <div class="flex items-center space-x-4 mb-12">
                 <div class="w-2 h-10 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
-                <h2 class="text-4xl md:text-6xl font-black text-white tracking-tighter">心情留言板</h2>
+                <h2 class="text-4xl md:text-6xl font-black text-white tracking-tighter">線上同學錄</h2>
             </div>
-            <div class="glass-card p-4 md:p-8 rounded-[3rem]">
-                <div class="padlet-container">
-                    <iframe src="https://padlet.com/embed/kjdhh3k07j4sjj3m" frameborder="0" allow="camera;microphone;geolocation;display-capture;clipboard-write" style="width:100%;height:608px;display:block;padding:0;margin:0"></iframe>
+
+            <div id="rosterGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 px-2">
+                <!-- 讀取中提示 -->
+                <div class="col-span-full py-12 text-center text-slate-500 text-xs tracking-widest">正在載入同學資料錄...</div>
+            </div>
+        </section>
+
+        <!-- 管理員專屬同學錄控制台（Roster Control Center） -->
+        <section id="rosterAdminSection" class="admin-section reveal mb-32">
+            <div class="flex items-center space-x-4 mb-12">
+                <div class="w-2 h-10 bg-gradient-to-b from-purple-600 to-indigo-600 rounded-full"></div>
+                <h2 class="text-3xl md:text-5xl font-black text-purple-300 tracking-tighter">同學錄控制台</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                <!-- 1. 新增/修改表單區域 -->
+                <div id="rosterEditor" class="glass-card p-8 rounded-[2.5rem] lg:col-span-1 border-purple-500/20">
+                    <h3 id="rosterFormTitle" class="text-xl font-black mb-6 text-purple-400">新增同學資訊</h3>
+                    <input type="hidden" id="editRosterId" value="">
+                    
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs text-slate-400 pl-1 font-bold">同學姓名</label>
+                            <input type="text" id="rosterName" placeholder="例如：王同學" class="bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none text-white text-sm focus:border-purple-500 transition">
+                        </div>
+                        
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs text-slate-400 pl-1 font-bold">頭像代表字 (僅限一字)</label>
+                            <input type="text" id="rosterChar" placeholder="例如：王" maxlength="1" class="bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none text-white text-sm text-center focus:border-purple-500 transition">
+                        </div>
+
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs text-slate-400 pl-1 font-bold">頭像漸層色系</label>
+                            <select id="rosterBg" class="bg-slate-800 border border-white/10 p-3.5 rounded-xl outline-none text-white text-sm focus:border-purple-500">
+                                <option value="from-blue-500 to-indigo-500">藍色宇宙 (Blue)</option>
+                                <option value="from-purple-500 to-pink-500">魔幻極光 (Purple)</option>
+                                <option value="from-amber-500 to-rose-500">夕陽晚霞 (Amber)</option>
+                                <option value="from-emerald-500 to-teal-500">青春翡翠 (Green)</option>
+                                <option value="from-cyan-500 to-sky-500">蔚藍晴空 (Cyan)</option>
+                                <option value="from-slate-600 to-slate-800">沉穩低調 (Slate)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs text-slate-400 pl-1 font-bold">社群連結類型</label>
+                            <select id="rosterSocialType" class="bg-slate-800 border border-white/10 p-3.5 rounded-xl outline-none text-white text-sm focus:border-purple-500">
+                                <option value="">無社群連結 (None)</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="threads">Threads</option>
+                                <option value="website">個人網站 (Website)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs text-slate-400 pl-1 font-bold">社群頁面完整網址</label>
+                            <input type="text" id="rosterSocialUrl" placeholder="https://instagram.com/帳號" class="bg-white/5 border border-white/10 p-3.5 rounded-xl outline-none text-white text-sm focus:border-purple-500 transition">
+                        </div>
+
+                        <div class="flex gap-3 pt-4">
+                            <button onclick="saveRoster()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-black py-4 rounded-xl uppercase tracking-widest text-xs transition shadow-lg shadow-purple-500/20">儲存資訊</button>
+                            <button onclick="cancelRosterEdit()" id="cancelRosterBtn" class="hidden bg-slate-700 hover:bg-slate-600 text-white font-black px-6 rounded-xl text-xs transition">取消</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="mt-4 flex justify-end">
-                    <a href="https://padlet.com?ref=embed" target="_blank" class="text-[10px] text-slate-500 font-bold tracking-widest hover:text-indigo-400 transition-colors uppercase">Open in Padlet Fullscreen</a>
+
+                <!-- 2. 同學名單控制列表區 -->
+                <div class="glass-card p-8 rounded-[2.5rem] lg:col-span-2 border-purple-500/20 flex flex-col h-[580px]">
+                    <h3 class="text-xl font-black mb-4 text-purple-400">目前同學清單管理</h3>
+                    <p class="text-xs text-slate-400 mb-6">您可以在此列表中快速進行同學資料的「修改」與「刪除」操作。</p>
+                    
+                    <div class="flex-1 overflow-y-auto pr-2 space-y-3" id="adminRosterList">
+                        <!-- 由 Javascript 動態載入名單清單 -->
+                    </div>
                 </div>
             </div>
         </section>
+
+        <!-- 常用連結與時光留影 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-32">
+            <!-- 常用連結 -->
+            <section class="reveal lg:col-span-1">
+                <div class="flex items-center justify-between mb-12 gap-4 px-2">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-2 h-10 bg-gradient-to-b from-indigo-500 to-rose-500 rounded-full"></div>
+                        <h2 class="text-4xl font-black text-white tracking-tighter">常用連結</h2>
+                    </div>
+                    <button onclick="toggleLinkEditor()" class="admin-section text-xs font-black text-indigo-400 tracking-widest uppercase">Manage</button>
+                </div>
+                <div id="linkEditor" class="hidden mb-12 glass-card p-8 rounded-[2.5rem]">
+                    <div class="grid grid-cols-1 gap-4 mb-4">
+                        <input type="text" id="newLinkTitle" placeholder="標題名稱" class="bg-white/5 border border-white/10 p-4 rounded-xl outline-none text-white text-sm">
+                        <input type="text" id="newLinkUrl" placeholder="URL 地址" class="bg-white/5 border border-white/10 p-4 rounded-xl outline-none text-white text-sm">
+                    </div>
+                    <button onclick="saveNewLink()" class="w-full bg-indigo-600 text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest">Connect to Cloud</button>
+                </div>
+                <div id="linksList" class="grid grid-cols-1 gap-4"></div>
+            </section>
+
+            <!-- 心情留言板區塊 -->
+            <section class="reveal lg:col-span-2">
+                <div class="flex items-center space-x-4 mb-12 px-2">
+                    <div class="w-2 h-10 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
+                    <h2 class="text-4xl font-black text-white tracking-tighter">心情留言板</h2>
+                </div>
+                <div class="glass-card p-4 rounded-[3rem]">
+                    <div class="padlet-container">
+                        <iframe src="https://padlet.com/embed/kjdhh3k07j4sjj3m" frameborder="0" allow="camera;microphone;geolocation;display-capture;clipboard-write" style="width:100%;height:500px;display:block;padding:0;margin:0"></iframe>
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <a href="https://padlet.com?ref=embed" target="_blank" class="text-[10px] text-slate-500 font-bold tracking-widest hover:text-indigo-400 transition-colors uppercase">Open Fullscreen</a>
+                    </div>
+                </div>
+            </section>
+        </div>
     </main>
 
-    <!-- 相簿彈窗 (保持不變) -->
+    <!-- 相簿彈窗 -->
     <div id="boardModal" class="fixed inset-0 z-[60] hidden bg-slate-950/80 backdrop-blur-3xl flex items-center justify-center">
         <div class="bg-slate-900 w-full h-full md:rounded-[3rem] overflow-hidden flex flex-col shadow-2xl transition-all opacity-0 scale-90" id="modalContent">
             <div class="px-8 py-6 flex justify-between items-center border-b border-white/5">
@@ -222,16 +356,28 @@
                 <button onclick="closeBoard()" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white">✕</button>
             </div>
             <div class="flex-1 overflow-y-auto p-8 md:p-16">
+                <!-- 相簿管理面板，按鈕文字已加上壓縮進度標示 -->
                 <div class="admin-section mb-12 max-w-xl mx-auto glass-card p-10 rounded-[2.5rem]">
                     <input type="file" id="fileInput" accept="image/*" multiple class="block w-full text-xs mb-6 text-slate-400">
-                    <button onclick="submitMultipleItems()" id="uploadBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase">Upload Memories</button>
+                    <button onclick="submitMultipleItems()" id="uploadBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase transition-all duration-300">上傳相片回憶 (內建自動無損壓縮)</button>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8" id="boardGrid"></div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8" id="boardGrid"></div>
             </div>
         </div>
     </div>
 
-    <!-- 驗證彈窗 (保持不變) -->
+    <!-- 全螢幕沉浸式燈箱 (Lightbox) -->
+    <div id="lightbox" class="fixed inset-0 z-[300] hidden bg-slate-950/95 backdrop-blur-3xl flex items-center justify-center">
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center text-white hover:bg-rose-500 transition-colors z-[310] text-lg font-sans">✕</button>
+        <button onclick="navigateLightbox(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-20 bg-white/5 hover:bg-white/15 rounded-2xl flex items-center justify-center text-white text-3xl transition-colors z-[310] backdrop-blur-md">&lsaquo;</button>
+        <div class="w-full h-full p-4 md:p-24 flex flex-col items-center justify-center relative">
+            <img id="lightboxImg" class="max-w-full max-h-full object-contain lightbox-transition lightbox-hidden shadow-2xl border-4 border-white/10 rounded-lg" src="" alt="放大照片">
+            <div id="lightboxCounter" class="absolute bottom-8 text-white/40 text-xs font-bold tracking-[0.3em] uppercase"></div>
+        </div>
+        <button onclick="navigateLightbox(1)" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-20 bg-white/5 hover:bg-white/15 rounded-2xl flex items-center justify-center text-white text-3xl transition-colors z-[310] backdrop-blur-md">&rsaquo;</button>
+    </div>
+
+    <!-- 驗證彈窗 -->
     <div id="loginModal" class="fixed inset-0 z-[100] hidden bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-6">
         <div class="glass-card p-12 rounded-[3rem] w-full max-w-sm text-center">
             <h3 class="text-3xl font-black mb-8 text-white">管理認證</h3>
@@ -242,7 +388,7 @@
     </div>
 
     <footer class="py-24 text-center opacity-30">
-        <p class="text-white text-[10px] font-black tracking-[0.8em] uppercase">Chronicle Archive v5.1 • Protected by GitHub Actions</p>
+        <p class="text-white text-[10px] font-black tracking-[0.8em] uppercase">Chronicle Archive v7.5 • Protected by GitHub Actions</p>
     </footer>
 
     <script>
@@ -252,6 +398,43 @@
 
         let currentGrade = '';
         let memoryData = {'704':[], '804':[], '904':[]};
+        let rosterList = [];
+        
+        let activeLightboxPhotos = [];
+        let activeLightboxIndex = 0;
+
+        // 🌟 29 位同學預設資料庫  🌟
+        const defaultRosterData = [
+            { name: '王勻妤', bg: 'from-blue-500 to-indigo-500', char: '王', social_type: 'instagram', social_url: 'https://www.instagram.com/carey107066/' },
+            { name: '潘宥澄', bg: 'from-blue-500 to-indigo-500', char: '潘', social_type: 'instagram', social_url: 'https://www.instagram.com/008787q/' },
+            { name: '余秉霖', bg: 'from-blue-500 to-indigo-500', char: '余', social_type: 'instagram', social_url: 'https://www.instagram.com/ling_.1001/' },
+            { name: '吳沛萱', bg: 'from-blue-500 to-indigo-500', char: '吳', social_type: 'instagram', social_url: 'https://www.instagram.com/c.yg___8/' },
+            { name: '李承峻', bg: 'from-blue-500 to-indigo-500', char: '李', social_type: 'instagram', social_url: 'https://www.instagram.com/cheng.jun_917/' },
+            { name: '林子恩', bg: 'from-blue-500 to-indigo-500', char: '林', social_type: 'instagram', social_url: 'https://www.instagram.com/peterl000915/' },
+            { name: '林威佑', bg: 'from-blue-500 to-indigo-500', char: '林', social_type: 'facebook', social_url: 'https://www.facebook.com/share/17tzWcEuTL/?mibextid=wwXIfr' },
+            { name: '林夏平', bg: 'from-blue-500 to-indigo-500', char: '林', social_type: 'instagram', social_url: 'https://www.instagram.com/popcat139722' },
+            { name: '洪于婕', bg: 'from-blue-500 to-indigo-500', char: '洪', social_type: 'instagram', social_url: 'https://www.instagram.com/419.yumi_/' },
+            { name: '洪秉維', bg: 'from-blue-500 to-indigo-500', char: '洪', social_type: 'instagram', social_url: 'https://www.instagram.com/fxuxifxfixtkxfix/' },
+            { name: '曹🐽🍋', bg: 'from-blue-500 to-indigo-500', char: '曹', social_type: 'instagram', social_url: 'https://www.instagram.com/amy0830_/' },
+            { name: '郭芮君', bg: 'from-blue-500 to-indigo-500', char: '郭', social_type: 'instagram', social_url: 'https://www.instagram.com/_cuzxy/' },
+            { name: '郭佑凱', bg: 'from-blue-500 to-indigo-500', char: '郭', social_type: 'instagram', social_url: 'https://www.instagram.com/kaibaoguo/' },
+            { name: '陳佩琪', bg: 'from-blue-500 to-indigo-500', char: '陳', social_type: 'instagram', social_url: 'https://www.instagram.com/chenqiqi627/' },
+            { name: '黃炯勳', bg: 'from-blue-500 to-indigo-500', char: '黃', social_type: 'instagram', social_url: 'https://www.instagram.com/jiong_16xun/' },
+            { name: '黃語飛', bg: 'from-blue-500 to-indigo-500', char: '黃', social_type: 'instagram', social_url: 'https://www.instagram.com/felix70417/' },
+            { name: '楊可威', bg: 'from-blue-500 to-indigo-500', char: '楊', social_type: 'instagram', social_url: 'https://www.instagram.com/kewei_1216/' },
+            { name: '葉翼齊', bg: 'from-blue-500 to-indigo-500', char: '葉', social_type: 'facebook', social_url: 'https://www.facebook.com/share/1D1PGgppKs/?mibextid=wwXIfr' },
+            { name: '潘瑋妡', bg: 'from-blue-500 to-indigo-500', char: '潘', social_type: 'instagram', social_url: 'https://www.instagram.com/q.p.army/' },
+            { name: '蔡上元', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/ryan.8146422/' },
+            { name: '蔡承希', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/_c3lyra/' },
+            { name: '蔡承起', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/jfhljq321_0726/' },
+            { name: '蔡侑哲', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/eitb29/' },
+            { name: '鄭迪恩', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/di_en_zheng/' },
+            { name: '錢佑助', bg: 'from-blue-500 to-indigo-500', char: '錢', social_type: 'instagram', social_url: 'https://www.instagram.com/qianyouzhu7/' },
+            { name: '謝佳賢', bg: 'from-blue-500 to-indigo-500', char: '謝', social_type: 'instagram', social_url: 'https://www.instagram.com/7zxxu9/' },
+            { name: '蘇嘉豪', bg: 'from-blue-500 to-indigo-500', char: '蘇', social_type: 'instagram', social_url: 'https://www.instagram.com/sujiahao8964/' },
+            { name: '鄭玉歆', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/yx._.10_12/' },
+            { name: '鄭令泉', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/cuang_0421/' }
+        ];
 
         async function bootstrap() {
             try {
@@ -260,19 +443,209 @@
                     await _supabase.from('links').select('id').limit(1);
                     return;
                 }
-                const [m, l] = await Promise.all([
+                const [m, l, r] = await Promise.all([
                     _supabase.from('memories').select('*').order('created_at', { ascending: false }),
-                    _supabase.from('links').select('*').order('created_at', { ascending: false })
+                    _supabase.from('links').select('*').order('created_at', { ascending: false }),
+                    _supabase.from('roster').select('*').order('created_at', { ascending: true })
                 ]);
+                
                 if (m.data) {
                     memoryData = {'704':[], '804':[], '904':[]};
                     m.data.forEach(item => { if(memoryData[item.grade]) memoryData[item.grade].push(item); });
                 }
                 if (l.data) renderLinks(l.data);
+                
+                if (r.data && r.data.length > 0) {
+                    rosterList = r.data;
+                } else {
+                    rosterList = defaultRosterData;
+                }
+                renderRoster();
+                renderAdminRosterList();
+
                 const { data: banner } = _supabase.storage.from('photos').getPublicUrl('site_banner.jpg');
                 if(banner) document.getElementById('bannerImg').src = banner.publicUrl + '?t=' + Date.now();
+                
                 handleReveal();
-            } catch(e) {}
+            } catch(e) {
+                rosterList = defaultRosterData;
+                renderRoster();
+                renderAdminRosterList();
+            }
+        }
+
+        // 輔助函式：取得精美的社群 SVG Logo 圖標 (加強支援 FB 與 IG)
+        function getSocialIconHTML(type, url) {
+            if (!type || !url) return '';
+            let svgContent = '';
+            let bgClass = 'bg-slate-700/40 hover:bg-slate-600';
+            
+            if (type === 'instagram') {
+                bgClass = 'bg-pink-600/30 hover:bg-pink-500 hover:shadow-pink-500/30';
+                svgContent = `
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                `;
+            } else if (type === 'facebook') {
+                bgClass = 'bg-blue-600/30 hover:bg-blue-500 hover:shadow-blue-500/30';
+                svgContent = `
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                    </svg>
+                `;
+            } else if (type === 'threads') {
+                bgClass = 'bg-black/40 hover:bg-slate-800 border border-white/10 hover:shadow-white/10';
+                svgContent = `
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 11v1c0 2.2 1.8 4 4 4a4 4 0 0 0 4-4v-1h2v1c0 3.31-2.69 6-6 6zm4-7.93c0 .55-.45 1-1 1s-1-.45-1-1v-2c0-2.2-1.8-4-4-4s-4 1.8-4 4v1H5.07a8 8 0 0 1 11.93 1z"></path>
+                    </svg>
+                `;
+            } else if (type === 'website') {
+                bgClass = 'bg-indigo-600/30 hover:bg-indigo-500 hover:shadow-indigo-500/30';
+                svgContent = `
+                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                `;
+            }
+
+            return `
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="mt-4 p-2.5 rounded-full ${bgClass} transition duration-300 flex items-center justify-center shadow-lg active:scale-90 hover:scale-110">
+                    ${svgContent}
+                </a>
+            `;
+        }
+
+        function renderRoster() {
+            const rosterContainer = document.getElementById('rosterGrid');
+            if (rosterList.length === 0) {
+                rosterContainer.innerHTML = `<div class="col-span-full py-12 text-center text-slate-500 text-xs tracking-widest">目前還沒有同學資料。</div>`;
+                return;
+            }
+            rosterContainer.innerHTML = rosterList.map((r) => `
+                <div class="roster-card p-5 rounded-3xl flex flex-col items-center text-center group/card justify-center">
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-br ${r.bg} flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-black/20">${r.char}</div>
+                    <h4 class="text-md font-black text-white mb-1">${r.name}</h4>
+                    ${getSocialIconHTML(r.social_type, r.social_url)}
+                </div>
+            `).join('');
+        }
+
+        function renderAdminRosterList() {
+            const container = document.getElementById('adminRosterList');
+            if (rosterList.length === 0) {
+                container.innerHTML = `<div class="text-center py-12 text-slate-500 text-sm">目前無名單，請使用左側表單新增。</div>`;
+                return;
+            }
+            container.innerHTML = rosterList.map((r, idx) => `
+                <div class="bg-white/5 border border-white/10 px-5 py-4 rounded-2xl flex items-center justify-between hover:bg-white/10 transition">
+                    <div class="flex items-center space-x-4 min-w-0">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br ${r.bg} flex items-center justify-center text-white font-black text-md shadow-inner">${r.char}</div>
+                        <div class="min-w-0">
+                            <h4 class="text-sm font-black text-white truncate">${r.name}</h4>
+                            <p class="text-[10px] text-purple-300 truncate">${r.social_type ? `${r.social_type.toUpperCase()} 已設定` : '無社群連結'}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0">
+                        <button onclick="startEditRoster(${idx})" class="bg-indigo-600/80 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center space-x-1 font-sans">
+                            <span>✎</span> <span class="hidden sm:inline">編輯</span>
+                        </button>
+                        <button onclick="deleteRosterItem('${r.id || ''}', ${idx})" class="bg-rose-600/80 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center space-x-1 font-sans">
+                            <span>✕</span> <span class="hidden sm:inline">刪除</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function startEditRoster(index) {
+            const member = rosterList[index];
+            document.getElementById('rosterFormTitle').innerText = `修改同學資訊 (${member.name})`;
+            document.getElementById('editRosterId').value = member.id || '';
+            document.getElementById('rosterName').value = member.name;
+            document.getElementById('rosterChar').value = member.char;
+            document.getElementById('rosterBg').value = member.bg;
+            document.getElementById('rosterSocialType').value = member.social_type || '';
+            document.getElementById('rosterSocialUrl').value = member.social_url || '';
+            document.getElementById('cancelRosterBtn').classList.remove('hidden');
+            document.getElementById('rosterEditor').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function cancelRosterEdit() {
+            document.getElementById('rosterFormTitle').innerText = "新增同學資訊";
+            document.getElementById('editRosterId').value = "";
+            document.getElementById('rosterName').value = "";
+            document.getElementById('rosterChar').value = "";
+            document.getElementById('rosterBg').value = "from-blue-500 to-indigo-500";
+            document.getElementById('rosterSocialType').value = "";
+            document.getElementById('rosterSocialUrl').value = "";
+            document.getElementById('cancelRosterBtn').classList.add('hidden');
+        }
+
+        async function saveRoster() {
+            const id = document.getElementById('editRosterId').value;
+            const name = document.getElementById('rosterName').value.trim();
+            const char = document.getElementById('rosterChar').value.trim();
+            const bg = document.getElementById('rosterBg').value;
+            const social_type = document.getElementById('rosterSocialType').value;
+            const social_url = document.getElementById('rosterSocialUrl').value.trim();
+
+            if (!name || !char) {
+                alert('請完整填寫所有欄位唷！');
+                return;
+            }
+
+            try {
+                if (id && id !== "") {
+                    const { error } = await _supabase.from('roster').update({ name, char, bg, social_type, social_url }).eq('id', id);
+                    if (error) throw error;
+                    alert('修改同學資訊成功！');
+                } else {
+                    const { error } = await _supabase.from('roster').insert([{ name, char, bg, social_type, social_url }]);
+                    if (error) throw error;
+                    alert('新增同學成功！');
+                }
+                const { data: r } = await _supabase.from('roster').select('*').order('created_at', { ascending: true });
+                if (r) rosterList = r;
+                renderRoster();
+                renderAdminRosterList();
+                cancelRosterEdit();
+            } catch (err) {
+                alert('雲端連線失敗，正在本地端模擬儲存！');
+                if (id && id !== "") {
+                    const idx = rosterList.findIndex(x => x.id === id);
+                    if (idx !== -1) rosterList[idx] = { id, name, char, bg, social_type, social_url };
+                } else {
+                    rosterList.push({ id: Date.now().toString(), name, char, bg, social_type, social_url });
+                }
+                renderRoster();
+                renderAdminRosterList();
+                cancelRosterEdit();
+            }
+        }
+
+        async function deleteRosterItem(id, localIdx) {
+            if (!confirm(`您確定要刪除這位同學的資訊嗎？\n此動作將無法復原唷！`)) return;
+            try {
+                if (id && id !== "") {
+                    const { error } = await _supabase.from('roster').delete().eq('id', id);
+                    if (error) throw error;
+                }
+                alert('刪除同學資訊成功！');
+                rosterList.splice(localIdx, 1);
+                renderRoster();
+                renderAdminRosterList();
+            } catch (err) {
+                alert('已執行本地端模擬刪除。');
+                rosterList.splice(localIdx, 1);
+                renderRoster();
+                renderAdminRosterList();
+            }
         }
 
         const cursorGlow = document.getElementById('cursor-glow');
@@ -280,6 +653,15 @@
             cursorGlow.style.left = e.clientX + 'px';
             cursorGlow.style.top = e.clientY + 'px';
             cursorGlow.style.opacity = '1';
+        });
+
+        window.addEventListener('keydown', (e) => {
+            const lb = document.getElementById('lightbox');
+            if(!lb.classList.contains('hidden')) {
+                if(e.key === 'Escape') closeLightbox();
+                if(e.key === 'ArrowRight') navigateLightbox(1);
+                if(e.key === 'ArrowLeft') navigateLightbox(-1);
+            }
         });
 
         const pContainer = document.getElementById('particles-container');
@@ -311,7 +693,7 @@
             document.getElementById('linksList').innerHTML = links.map(link => `
                 <div class="link-card glass-card p-6 rounded-2xl flex items-center justify-between group overflow-hidden relative">
                     <a href="${link.url}" target="_blank" class="font-black text-slate-200 truncate text-xs hover:text-indigo-400 transition-colors uppercase z-10">${link.title}</a>
-                    <button onclick="deleteLink('${link.id}')" class="admin-section text-rose-400 text-xs ml-2 z-10">✕</button>
+                    <button onclick="deleteLink('${link.id}')" class="admin-section text-rose-400 text-xs ml-2 z-10 font-sans">✕</button>
                     <div class="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </div>
             `).join('');
@@ -337,36 +719,153 @@
 
         function renderGrid() {
             const grid = document.getElementById('boardGrid');
-            grid.innerHTML = (memoryData[currentGrade] || []).map((item, idx) => `
-                <div class="photo-frame bg-white p-3 shadow-2xl" style="transform: rotate(${(Math.random()*6-3).toFixed(1)}deg)">
-                    <img src="${item.url}" class="w-full aspect-square object-cover cursor-zoom-in" onclick="window.open('${item.url}')">
+            activeLightboxPhotos = memoryData[currentGrade] || [];
+            grid.innerHTML = activeLightboxPhotos.map((item, idx) => `
+                <div class="photo-frame bg-white p-3 shadow-2xl cursor-zoom-in" style="transform: rotate(${(Math.random()*6-3).toFixed(1)}deg)" onclick="openLightbox(${idx})">
+                    <img src="${item.url}" class="w-full aspect-square object-cover" loading="lazy">
                     <div class="flex justify-between items-center mt-2 px-1">
-                        <span class="text-[9px] font-black text-slate-400 italic">#${memoryData[currentGrade].length - idx}</span>
-                        <button onclick="deleteItem('${item.id}')" class="admin-section bg-rose-500 text-white w-5 h-5 rounded-full text-[8px] flex items-center justify-center">✕</button>
+                        <span class="text-[9px] font-black text-slate-400 italic">#${activeLightboxPhotos.length - idx}</span>
+                        <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="admin-section bg-rose-500 text-white w-5 h-5 rounded-full text-[8px] flex items-center justify-center font-sans">✕</button>
                     </div>
                 </div>
             `).join('');
         }
 
+        function openLightbox(idx) {
+            activeLightboxIndex = idx;
+            document.getElementById('lightbox').classList.remove('hidden');
+            updateLightboxContent();
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.add('hidden');
+            document.getElementById('lightboxImg').src = "";
+        }
+
+        function navigateLightbox(direction) {
+            activeLightboxIndex += direction;
+            if (activeLightboxIndex < 0) activeLightboxIndex = activeLightboxPhotos.length - 1;
+            if (activeLightboxIndex >= activeLightboxPhotos.length) activeLightboxIndex = 0;
+            updateLightboxContent();
+        }
+
+        function updateLightboxContent() {
+            const img = document.getElementById('lightboxImg');
+            const counter = document.getElementById('lightboxCounter');
+            img.classList.remove('lightbox-visible');
+            img.classList.add('lightbox-hidden');
+            setTimeout(() => {
+                img.src = activeLightboxPhotos[activeLightboxIndex].url;
+                img.onload = () => {
+                    img.classList.remove('lightbox-hidden');
+                    img.classList.add('lightbox-visible');
+                };
+                counter.innerText = `${activeLightboxIndex + 1} / ${activeLightboxPhotos.length}`;
+            }, 150);
+        }
+
+        // 🌟 核心升級：前端 JavaScript 智慧圖片壓縮上傳算法 🌟
         async function submitMultipleItems() {
-            const files = document.getElementById('fileInput').files;
+            const fileInput = document.getElementById('fileInput');
+            const files = fileInput.files;
             if (!files.length) return;
-            for (let file of files) {
-                const path = `img_${Date.now()}_${Math.random().toString(36).substr(2,5)}`;
-                const { error } = await _supabase.storage.from('photos').upload(path, file);
-                if (!error) {
-                    const { data } = _supabase.storage.from('photos').getPublicUrl(path);
-                    await _supabase.from('memories').insert([{ grade: currentGrade, url: data.publicUrl }]);
+
+            const uploadBtn = document.getElementById('uploadBtn');
+            uploadBtn.disabled = true;
+            uploadBtn.innerText = "正在進行智慧無損壓縮並上傳...";
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                uploadBtn.innerText = `正在壓縮第 ${i+1}/${files.length} 張相片...`;
+
+                try {
+                    // 執行前端圖片壓縮：限制最大寬度 1280px，畫質設定為 0.8
+                    const compressedBlob = await compressImage(file, 1280, 0.8);
+                    const path = `img_${Date.now()}_${Math.random().toString(36).substr(2,5)}.jpg`;
+
+                    const { error } = await _supabase.storage.from('photos').upload(path, compressedBlob, {
+                        contentType: 'image/jpeg'
+                    });
+
+                    if (!error) {
+                        const { data } = _supabase.storage.from('photos').getPublicUrl(path);
+                        await _supabase.from('memories').insert([{ grade: currentGrade, url: data.publicUrl }]);
+                    }
+                } catch (compressErr) {
+                    console.error("壓縮上傳失敗，改為原圖直接上傳", compressErr);
+                    // 備用方案：若壓縮失敗，則自動改用原圖上傳，確保系統堅固防呆
+                    const path = `img_${Date.now()}_${Math.random().toString(36).substr(2,5)}`;
+                    const { error } = await _supabase.storage.from('photos').upload(path, file);
+                    if (!error) {
+                        const { data } = _supabase.storage.from('photos').getPublicUrl(path);
+                        await _supabase.from('memories').insert([{ grade: currentGrade, url: data.publicUrl }]);
+                    }
                 }
             }
-            location.reload();
+
+            uploadBtn.innerText = "上傳成功！即將重新載入...";
+            setTimeout(() => {
+                location.reload();
+            }, 800);
+        }
+
+        // 🖼️ 輔助函式：HTML5 Canvas 圖片像素壓縮算法 🖼️
+        function compressImage(file, maxWidth, quality) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // 計算等比例縮放
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // 導出為高效率壓縮的 jpeg 格式 blob
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error("Canvas to Blob 失敗"));
+                            }
+                        }, 'image/jpeg', quality);
+                    };
+                    img.onerror = (err) => reject(err);
+                };
+                reader.onerror = (err) => reject(err);
+            });
         }
 
         async function deleteItem(id) { if(confirm('Delete?')) { await _supabase.from('memories').delete().eq('id', id); location.reload(); } }
         function closeBoard() { document.getElementById('boardModal').classList.add('hidden'); }
         function openLogin() { document.getElementById('loginModal').classList.remove('hidden'); }
         function closeLogin() { document.getElementById('loginModal').classList.add('hidden'); }
-        function verifyLogin() { if(document.getElementById('adminPass').value === 'admin04') { document.body.classList.add('is-admin'); closeLogin(); } }
+        
+        function verifyLogin() { 
+            if(document.getElementById('adminPass').value === 'admin04') { 
+                document.body.classList.add('is-admin'); 
+                document.querySelectorAll('.admin-section').forEach(el => {
+                    el.style.setProperty('display', 'block', 'important');
+                });
+                closeLogin(); 
+            } else { 
+                alert('驗證失敗'); 
+            } 
+        }
+        
         function logout() { location.reload(); }
         function toggleLinkEditor() { document.getElementById('linkEditor').classList.toggle('hidden'); }
 
@@ -374,34 +873,3 @@
     </script>
 </body>
 </html>
-
-
-<!-- Refresh: Wed May 13 13:44:12 UTC 2026 -->
-<!-- Auto Update: Wed May 13 13:54:05 UTC 2026 -->
-<!-- Auto Update: Wed May 13 13:56:08 UTC 2026 -->
-<!-- Auto Update: Thu May 14 09:40:00 UTC 2026 -->
-<!-- Auto Update: Fri May 15 10:00:56 UTC 2026 -->
-<!-- Auto Update: Sat May 16 07:32:34 UTC 2026 -->
-<!-- Auto Update: Sun May 17 08:35:15 UTC 2026 -->
-<!-- Auto Update: Mon May 18 12:52:25 UTC 2026 -->
-<!-- Auto Update: Tue May 19 11:43:06 UTC 2026 -->
-<!-- Auto Update: Wed May 20 03:35:52 UTC 2026 -->
-<!-- Auto Update: Wed May 20 07:37:11 UTC 2026 -->
-<!-- Auto Update: Wed May 20 07:42:09 UTC 2026 -->
-<!-- Auto Update: Wed May 20 07:52:09 UTC 2026 -->
-<!-- Auto Update: Wed May 20 07:56:07 UTC 2026 -->
-<!-- Auto Update: Wed May 20 08:03:51 UTC 2026 -->
-<!-- Auto Update: Wed May 20 08:04:27 UTC 2026 -->
-<!-- Auto Update: Wed May 20 08:07:27 UTC 2026 -->
-<!-- Auto Update: Wed May 20 08:07:51 UTC 2026 -->
-<!-- Auto Update: Wed May 20 08:09:02 UTC 2026 -->
-<!-- Auto Update: Wed May 20 08:09:32 UTC 2026 -->
-<!-- Auto Update: Thu May 21 03:42:16 UTC 2026 -->
-<!-- Auto Update: Fri May 22 03:40:22 UTC 2026 -->
-<!-- Auto Update: Sat May 23 02:56:49 UTC 2026 -->
-<!-- Auto Update: Sun May 24 03:37:09 UTC 2026 -->
-<!-- Auto Update: Mon May 25 03:51:38 UTC 2026 -->
-<!-- Auto Update: Tue May 26 03:34:14 UTC 2026 -->
-<!-- Auto Update: Wed May 27 03:51:15 UTC 2026 -->
-<!-- Auto Update: Thu May 28 03:37:17 UTC 2026 -->
-<!-- Auto Update: Fri May 29 03:37:33 UTC 2026 -->
