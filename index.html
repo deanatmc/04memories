@@ -894,7 +894,7 @@
             }
         }
         
-        // 🔒 Web Crypto API 原生 SHA-256 位元轉換演算法
+        // 🔒 Web Crypto API 原生 
         async function sha256(message) {
             const msgBuffer = new TextEncoder().encode(message);
             const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
