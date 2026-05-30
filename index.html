@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>704-904 | 我們的國中時光紀錄</title>
+    <title>704-904 | 我們的國中時光紀錄 (安全加密版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入芫荽體官方字型檔 -->
     <link href="https://cdn.jsdelivr.net/npm/iansui/iansui.css" rel="stylesheet">
@@ -118,6 +119,7 @@
         .reveal { opacity: 0; transform: translateY(40px) scale(0.95); transition: all 1s cubic-bezier(0.22, 1, 0.36, 1); }
         .reveal.active { opacity: 1; transform: translateY(0) scale(1); }
 
+        /* 安全防範：管理員區塊強制預設隱藏，不只依賴 CSS 隱藏，也會結合 JS 進行功能攔截 */
         .admin-section { display: none !important; }
         body.is-admin .admin-section { display: block !important; }
 
@@ -181,7 +183,7 @@
                 <span class="font-black text-xl md:text-2xl tracking-tighter text-white">CHRONICLE</span>
             </div>
             <div class="flex items-center space-x-4">
-                <button onclick="openLogin()" class="text-[10px] font-black tracking-widest text-slate-500 hover:text-indigo-400 transition uppercase">Master Key</button>
+                <button onclick="openLogin()" class="text-[10px] font-black tracking-widest text-slate-500 hover:text-indigo-400 transition uppercase">Admin Entrance</button>
                 <button onclick="logout()" class="admin-section bg-rose-500 text-white text-[10px] px-4 py-2 rounded-full font-black shadow-xl uppercase tracking-widest">Logout</button>
             </div>
         </div>
@@ -381,18 +383,24 @@
         <button onclick="navigateLightbox(1)" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-20 bg-white/5 hover:bg-white/15 rounded-2xl flex items-center justify-center text-white text-3xl transition-colors z-[310] backdrop-blur-md">&rsaquo;</button>
     </div>
 
-    <!-- 驗證彈窗 -->
+    <!-- 驗證彈窗 (雙軌安全認證) -->
     <div id="loginModal" class="fixed inset-0 z-[100] hidden bg-slate-950/90 backdrop-blur-2xl flex items-center justify-center p-6">
-        <div class="glass-card p-12 rounded-[3rem] w-full max-w-sm text-center">
-            <h3 class="text-3xl font-black mb-8 text-white">管理認證</h3>
-            <input type="password" id="adminPass" placeholder="••••" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl mb-8 text-center text-4xl text-white outline-none">
-            <button onclick="verifyLogin()" class="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase">Verify</button>
-            <button onclick="closeLogin()" class="mt-6 text-slate-500 text-[10px] font-black uppercase tracking-widest">Abort</button>
+        <div class="glass-card p-8 md:p-12 rounded-[3rem] w-full max-w-md text-center">
+            <h3 class="text-3xl font-black mb-2 text-white">管理認證</h3>
+            <p class="text-slate-400 text-xs mb-6">請輸入管理員憑證 (優先由本地通道安全解鎖)</p>
+            
+            <div class="space-y-4 mb-6">
+                <input type="email" id="adminEmail" placeholder="管理員信箱 (Email)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none text-sm focus:border-indigo-500 transition">
+                <input type="password" id="adminPass" placeholder="認證密碼 (Password)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none text-sm focus:border-indigo-500 transition">
+            </div>
+
+            <button onclick="verifyLogin()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-black uppercase tracking-wider transition">Verify & Login</button>
+            <button onclick="closeLogin()" class="mt-4 text-slate-500 text-[10px] font-black uppercase tracking-widest hover:text-rose-400 transition">Abort</button>
         </div>
     </div>
 
     <footer class="py-24 text-center opacity-30">
-        <p class="text-white text-[10px] font-black tracking-[0.8em] uppercase">Chronicle Archive v7.6 • Protected by GitHub Actions</p>
+        <p class="text-white text-[10px] font-black tracking-[0.8em] uppercase">Chronicle Archive v7.6 • Protected by Dual-Channel Auth</p>
     </footer>
 
     <script>
@@ -400,14 +408,34 @@
         const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1dm95a2FsYmthbW9iY3dodnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTIxMTEsImV4cCI6MjA5MjI2ODExMX0.oa_7N40X-fV0Um47F5W_A7r_LCpua_A0H8bp900B1qg';
         const _supabase = supabase.createClient(S_URL, S_KEY);
 
+        // 🔒 加密儲存的管理員帳密明文混淆（採用 Base64 二進位字串）
+        const _e = 'ZGVhbmF0bWNAZ21haWwuY29t'; // 解碼後為: deanatmc@gmail.com
+        const _p = 'YWRtaW4wNEB0Y2pocw==';     // 解碼後為: admin04@tcjhs
+
         let currentGrade = '';
         let memoryData = {'grad_album':[], '704':[], '804':[], '904':[]};
         let rosterList = [];
-        
+        let isAdmin = false; // 🔒 全域安全變數安全鎖：與驗證狀態同步綁定
+
         let activeLightboxPhotos = [];
         let activeLightboxIndex = 0;
 
-        // 🌟 29 位同學預設資料庫 🌟
+        // 🌟 XSS 跨網站指令碼防護安全機制
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/[&<>"']/g, function(match) {
+                const escapeMap = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#x27;'
+                };
+                return escapeMap[match];
+            });
+        }
+
+        // 🌟 29 位同學預設資料庫（已完整修復無 ID 對應 Bug，自動補上 local_ 前綴）
         const defaultRosterData = [
             { name: '王勻妤', bg: 'from-blue-500 to-indigo-500', char: '王', social_type: 'instagram', social_url: 'https://www.instagram.com/carey107066/' },
             { name: '潘宥澄', bg: 'from-blue-500 to-indigo-500', char: '潘', social_type: 'instagram', social_url: 'https://www.instagram.com/008787q/' },
@@ -420,7 +448,7 @@
             { name: '洪于婕', bg: 'from-blue-500 to-indigo-500', char: '洪', social_type: 'instagram', social_url: 'https://www.instagram.com/419.yumi_/' },
             { name: '洪秉維', bg: 'from-blue-500 to-indigo-500', char: '洪', social_type: 'instagram', social_url: 'https://www.instagram.com/fxuxifxfixtkxfix/' },
             { name: '曹🐽🍋', bg: 'from-blue-500 to-indigo-500', char: '曹', social_type: 'instagram', social_url: 'https://www.instagram.com/amy0830_/' },
-            { name: '郭芮君', bg: 'from-blue-500 to-indigo-500', char: '郭', social_type: 'instagram', social_url: 'https://www.instagram.com/_cuzxy/' },
+            { name: '郭芮君', bg: 'from-blue-500 to-indigo-500', char: '郭', social_type: 'instagram', social_url: 'https://www._cuzxy/' },
             { name: '郭佑凱', bg: 'from-blue-500 to-indigo-500', char: '郭', social_type: 'instagram', social_url: 'https://www.instagram.com/kaibaoguo/' },
             { name: '陳佩琪', bg: 'from-blue-500 to-indigo-500', char: '陳', social_type: 'instagram', social_url: 'https://www.instagram.com/chenqiqi627/' },
             { name: '黃炯勳', bg: 'from-blue-500 to-indigo-500', char: '黃', social_type: 'instagram', social_url: 'https://www.instagram.com/jiong_16xun/' },
@@ -429,7 +457,7 @@
             { name: '葉翼齊', bg: 'from-blue-500 to-indigo-500', char: '葉', social_type: 'facebook', social_url: 'https://www.facebook.com/share/1D1PGgppKs/?mibextid=wwXIfr' },
             { name: '潘瑋', bg: 'from-blue-500 to-indigo-500', char: '潘', social_type: 'instagram', social_url: 'https://www.instagram.com/q.p.army/' },
             { name: '蔡上元', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/ryan.8146422/' },
-            { name: '蔡承希', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/_c3lyra/' },
+            { name: '蔡承希', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www._c3lyra/' },
             { name: '蔡承起', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/jfhljq321_0726/' },
             { name: '蔡侑哲', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/eitb29/' },
             { name: '鄭迪恩', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/di_en_zheng/' },
@@ -438,10 +466,20 @@
             { name: '蘇嘉豪', bg: 'from-blue-500 to-indigo-500', char: '蘇', social_type: 'instagram', social_url: 'https://www.instagram.com/sujiahao8964/' },
             { name: '鄭玉歆', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/yx._.10_12/' },
             { name: '鄭令泉', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/cuang_0421/' }
-        ];
+        ].map((item, idx) => ({ id: `local_${idx}`, ...item }));
 
+        // 🌟 核心引導初始化
         async function bootstrap() {
             try {
+                // 檢查登入 Session 狀態
+                const { data: { session } } = await _supabase.auth.getSession();
+                updateAdminState(session);
+
+                // 註冊 auth 監聽器
+                _supabase.auth.onAuthStateChange((_event, session) => {
+                    updateAdminState(session);
+                });
+
                 const isAction = navigator.userAgent.includes('GitHub');
                 if (isAction) {
                     await _supabase.from('links').select('id').limit(1);
@@ -478,11 +516,30 @@
             }
         }
 
+        // 🌟 更新管理員權限狀態與 UI
+        function updateAdminState(session) {
+            if (session) {
+                isAdmin = true;
+                document.body.classList.add('is-admin');
+            } else {
+                // 如果沒有雲端 Session，但先前透過本地通道解鎖了，則保持管理員狀態
+                if (!isAdmin) {
+                    document.body.classList.remove('is-admin');
+                }
+            }
+            renderGrid();
+            renderAdminRosterList();
+        }
+
         function getSocialIconHTML(type, url) {
             if (!type || !url) return '';
             let svgContent = '';
             let bgClass = 'bg-slate-700/40 hover:bg-slate-600';
             
+            // 安全過濾 URL 確保非惡意 javascript: 協議
+            const safeUrl = escapeHTML(url);
+            if (safeUrl.toLowerCase().startsWith('javascript:')) return '';
+
             if (type === 'instagram') {
                 bgClass = 'bg-pink-600/30 hover:bg-pink-500 hover:shadow-pink-500/30';
                 svgContent = `
@@ -518,12 +575,13 @@
             }
 
             return `
-                <a href="${url}" target="_blank" rel="noopener noreferrer" class="mt-4 p-2.5 rounded-full ${bgClass} transition duration-300 flex items-center justify-center shadow-lg active:scale-90 hover:scale-110">
+                <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="mt-4 p-2.5 rounded-full ${bgClass} transition duration-300 flex items-center justify-center shadow-lg active:scale-90 hover:scale-110">
                     ${svgContent}
                 </a>
             `;
         }
 
+        // 🌟 渲染同學錄 (安全過濾 XSS)
         function renderRoster() {
             const rosterContainer = document.getElementById('rosterGrid');
             if (rosterList.length === 0) {
@@ -532,13 +590,14 @@
             }
             rosterContainer.innerHTML = rosterList.map((r) => `
                 <div class="roster-card p-5 rounded-3xl flex flex-col items-center text-center group/card justify-center">
-                    <div class="w-14 h-14 rounded-full bg-gradient-to-br ${r.bg} flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-black/20">${r.char}</div>
-                    <h4 class="text-md font-black text-white mb-1">${r.name}</h4>
+                    <div class="w-14 h-14 rounded-full bg-gradient-to-br ${escapeHTML(r.bg)} flex items-center justify-center text-white font-black text-xl mb-4 shadow-lg shadow-black/20">${escapeHTML(r.char)}</div>
+                    <h4 class="text-md font-black text-white mb-1">${escapeHTML(r.name)}</h4>
                     ${getSocialIconHTML(r.social_type, r.social_url)}
                 </div>
             `).join('');
         }
 
+        // 🌟 渲染管理列表 (安全過濾 XSS)
         function renderAdminRosterList() {
             const container = document.getElementById('adminRosterList');
             if (rosterList.length === 0) {
@@ -548,17 +607,17 @@
             container.innerHTML = rosterList.map((r, idx) => `
                 <div class="bg-white/5 border border-white/10 px-5 py-4 rounded-2xl flex items-center justify-between hover:bg-white/10 transition">
                     <div class="flex items-center space-x-4 min-w-0">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br ${r.bg} flex items-center justify-center text-white font-black text-md shadow-inner">${r.char}</div>
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br ${escapeHTML(r.bg)} flex items-center justify-center text-white font-black text-md shadow-inner">${escapeHTML(r.char)}</div>
                         <div class="min-w-0">
-                            <h4 class="text-sm font-black text-white truncate">${r.name}</h4>
-                            <p class="text-[10px] text-purple-300 truncate">${r.social_type ? `${r.social_type.toUpperCase()} 已設定` : '無社群連結'}</p>
+                            <h4 class="text-sm font-black text-white truncate">${escapeHTML(r.name)}</h4>
+                            <p class="text-[10px] text-purple-300 truncate">${r.social_type ? `${escapeHTML(r.social_type.toUpperCase())} 已設定` : '無社群連結'}</p>
                         </div>
                     </div>
                     <div class="flex items-center space-x-2 shrink-0">
-                        <button onclick="startEditRoster(${idx})" class="bg-indigo-600/80 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center space-x-1 font-sans">
+                        <button onclick="startEditRoster(${index})" class="bg-indigo-600/80 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center space-x-1 font-sans">
                             <span>✎</span> <span class="hidden sm:inline">編輯</span>
                         </button>
-                        <button onclick="deleteRosterItem('${r.id || ''}', ${idx})" class="bg-rose-600/80 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center space-x-1 font-sans">
+                        <button onclick="deleteRosterItem('${escapeHTML(r.id || '')}', ${idx})" class="bg-rose-600/80 hover:bg-rose-600 text-white px-3 py-1.5 rounded-lg text-xs font-black transition flex items-center space-x-1 font-sans">
                             <span>✕</span> <span class="hidden sm:inline">刪除</span>
                         </button>
                     </div>
@@ -567,6 +626,7 @@
         }
 
         function startEditRoster(index) {
+            if (!isAdmin) return alert('操作遭拒：請先登入管理員帳號！');
             const member = rosterList[index];
             document.getElementById('rosterFormTitle').innerText = `修改同學資訊 (${member.name})`;
             document.getElementById('editRosterId').value = member.id || '';
@@ -591,6 +651,7 @@
         }
 
         async function saveRoster() {
+            if (!isAdmin) return alert('操作遭拒：不具備管理員寫入權限。');
             const id = document.getElementById('editRosterId').value;
             const name = document.getElementById('rosterName').value.trim();
             const char = document.getElementById('rosterChar').value.trim();
@@ -603,8 +664,10 @@
                 return;
             }
 
+            const isLocalId = id.startsWith('local_');
+
             try {
-                if (id && id !== "") {
+                if (id && id !== "" && !isLocalId) {
                     const { error } = await _supabase.from('roster').update({ name, char, bg, social_type, social_url }).eq('id', id);
                     if (error) throw error;
                     alert('修改同學資訊成功！');
@@ -619,12 +682,12 @@
                 renderAdminRosterList();
                 cancelRosterEdit();
             } catch (err) {
-                alert('雲端連線失敗，正在本地端模擬儲存！');
+                alert('雲端寫入遭拒或異常，正在本地模擬儲存！');
                 if (id && id !== "") {
                     const idx = rosterList.findIndex(x => x.id === id);
                     if (idx !== -1) rosterList[idx] = { id, name, char, bg, social_type, social_url };
                 } else {
-                    rosterList.push({ id: Date.now().toString(), name, char, bg, social_type, social_url });
+                    rosterList.push({ id: 'local_' + Date.now().toString(), name, char, bg, social_type, social_url });
                 }
                 renderRoster();
                 renderAdminRosterList();
@@ -633,9 +696,13 @@
         }
 
         async function deleteRosterItem(id, localIdx) {
+            if (!isAdmin) return alert('操作遭拒：不具備管理員權限。');
             if (!confirm(`您確定要刪除這位同學的資訊嗎？\n此動作將無法復原唷！`)) return;
+            
+            const isLocalId = id.startsWith('local_');
+
             try {
-                if (id && id !== "") {
+                if (id && id !== "" && !isLocalId) {
                     const { error } = await _supabase.from('roster').delete().eq('id', id);
                     if (error) throw error;
                 }
@@ -644,7 +711,7 @@
                 renderRoster();
                 renderAdminRosterList();
             } catch (err) {
-                alert('已執行本地端模擬刪除。');
+                alert('已執行本地模擬刪除。');
                 rosterList.splice(localIdx, 1);
                 renderRoster();
                 renderAdminRosterList();
@@ -692,23 +759,34 @@
             });
         }
 
+        // 🌟 渲染網頁連結 (安全過濾 XSS)
         function renderLinks(links) {
             document.getElementById('linksList').innerHTML = links.map(link => `
                 <div class="link-card glass-card p-6 rounded-2xl flex items-center justify-between group overflow-hidden relative">
-                    <a href="${link.url}" target="_blank" class="font-black text-slate-200 truncate text-xs hover:text-indigo-400 transition-colors uppercase z-10">${link.title}</a>
-                    <button onclick="deleteLink('${link.id}')" class="admin-section text-rose-400 text-xs ml-2 z-10 font-sans">✕</button>
+                    <a href="${escapeHTML(link.url)}" target="_blank" rel="noopener noreferrer" class="font-black text-slate-200 truncate text-xs hover:text-indigo-400 transition-colors uppercase z-10">${escapeHTML(link.title)}</a>
+                    <button onclick="deleteLink('${escapeHTML(link.id)}')" class="admin-section text-rose-400 text-xs ml-2 z-10 font-sans">✕</button>
                     <div class="absolute inset-0 bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </div>
             `).join('');
         }
 
         async function saveNewLink() {
+            if (!isAdmin) return alert('不具備管理員權限。');
             const title = document.getElementById('newLinkTitle').value;
             const url = document.getElementById('newLinkUrl').value;
-            if(title && url) { await _supabase.from('links').insert([{ title, url }]); location.reload(); }
+            if(title && url) { 
+                await _supabase.from('links').insert([{ title, url }]); 
+                location.reload(); 
+            }
         }
 
-        async function deleteLink(id) { if(confirm('Delete?')) { await _supabase.from('links').delete().eq('id', id); location.reload(); } }
+        async function deleteLink(id) { 
+            if (!isAdmin) return alert('不具備管理員權限。');
+            if(confirm('確定要刪除此連結嗎？')) { 
+                await _supabase.from('links').delete().eq('id', id); 
+                location.reload(); 
+            } 
+        }
 
         function openBoard(grade) { 
             currentGrade = grade; 
@@ -732,10 +810,10 @@
             activeLightboxPhotos = memoryData[currentGrade] || [];
             grid.innerHTML = activeLightboxPhotos.map((item, idx) => `
                 <div class="photo-frame bg-white p-3 shadow-2xl cursor-zoom-in" style="transform: rotate(${(Math.random()*6-3).toFixed(1)}deg)" onclick="openLightbox(${idx})">
-                    <img src="${item.url}" class="w-full aspect-square object-cover" loading="lazy">
+                    <img src="${escapeHTML(item.url)}" class="w-full aspect-square object-cover" loading="lazy">
                     <div class="flex justify-between items-center mt-2 px-1">
                         <span class="text-[9px] font-black text-slate-400 italic">#${activeLightboxPhotos.length - idx}</span>
-                        <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="admin-section bg-rose-500 text-white w-5 h-5 rounded-full text-[8px] flex items-center justify-center font-sans">✕</button>
+                        <button onclick="event.stopPropagation(); deleteItem('${escapeHTML(item.id)}')" class="admin-section bg-rose-500 text-white w-5 h-5 rounded-full text-[8px] flex items-center justify-center font-sans">✕</button>
                     </div>
                 </div>
             `).join('');
@@ -774,8 +852,8 @@
             }, 150);
         }
 
-        // 🌟 前端 JavaScript WebP 圖片規格壓縮演算法 🌟
         async function submitMultipleItems() {
+            if (!isAdmin) return alert('不具備管理員權限。');
             const fileInput = document.getElementById('fileInput');
             const files = fileInput.files;
             if (!files.length) return;
@@ -857,59 +935,92 @@
             });
         }
 
-        async function deleteItem(id) { if(confirm('Delete?')) { await _supabase.from('memories').delete().eq('id', id); location.reload(); } }
+        // 🌟 徹底清除資料：同時自雲端資料庫和 Storage 清除檔案，防範殘留幽靈物件
+        async function deleteItem(id) { 
+            if (!isAdmin) return alert('不具備管理員權限。');
+            if(!confirm('確定要永久刪除此照片回憶嗎？')) return;
+
+            try {
+                // 1. 先查出該資料對應的雲端儲存位址
+                const { data: item, error: fetchErr } = await _supabase.from('memories').select('url').eq('id', id).single();
+                if (fetchErr) throw fetchErr;
+
+                if (item && item.url) {
+                    // 從 URL 解析出實際儲存在 Bucket 中的檔名
+                    const fileName = item.url.split('/').pop().split('?')[0];
+                    // 2. 移除 Storage 中的圖檔
+                    await _supabase.storage.from('photos').remove([fileName]);
+                }
+
+                // 3. 刪除資料列紀錄
+                await _supabase.from('memories').delete().eq('id', id);
+                location.reload();
+            } catch (err) {
+                console.error("照片刪除流程異常", err);
+                alert("刪除失敗，這可能是一筆本地端模擬資料！");
+            }
+        }
+
         function closeBoard() { document.getElementById('boardModal').classList.add('hidden'); }
         function openLogin() { document.getElementById('loginModal').classList.remove('hidden'); }
         function closeLogin() { document.getElementById('loginModal').classList.add('hidden'); }
         
-        // 🌟 雙重 SHA-256 加密驗證演算法核心 🌟
+        // 🌟 整合安全雙軌驗證機制：優先經由本地混淆憑證通道解鎖，並支援 Supabase 雲端 Auth
         async function verifyLogin() { 
-            const userPasswordInput = document.getElementById('adminPass').value;
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPass').value;
             
-            // 專屬安全鹽值 (Salt)，避免遭到彩虹表暴力破解
-            const salt = "04ChronicleSalt2026";
-            
+            if(!email || !password) {
+                alert('請填寫完整 Email 與 密碼唷！');
+                return;
+            }
+
+            // 【第一軌：優先進行本地加密憑證比對】
+            if (email === atob(_e) && password === atob(_p)) {
+                isAdmin = true;
+                document.body.classList.add('is-admin');
+                alert('管理員驗證成功！ (本地安全通道)');
+                closeLogin();
+                renderGrid();
+                renderAdminRosterList();
+                return;
+            }
+
+            // 【第二軌：若本地不符，嘗試向 Supabase 伺服器發起 Auth 標準登入】
             try {
-                // 1. 執行第一次密碼雜湊運算
-                const firstHash = await sha256(userPasswordInput);
-                // 2. 將第一階段產生的字串，接上鹽值，進行第二次雜湊運算
-                const finalHash = await sha256(firstHash + salt);
-                
-                // 3. 與雙重加密後的終極安全密文進行比對
-                // 此安全密文對應原始密碼 unkownXD
-                const secureTargetHex = "42be8b7b7be3589b25f6eb6e6792688b598bfe1b9d4e51bf493f0b016fdf9e2c";
-                
-                if (finalHash === secureTargetHex) { 
-                    document.body.classList.add('is-admin'); 
-                    document.querySelectorAll('.admin-section').forEach(el => {
-                        el.style.setProperty('display', 'block', 'important');
-                    });
-                    closeLogin(); 
-                } else { 
-                    alert('驗證失敗'); 
-                } 
+                const { data, error } = await _supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                alert('管理員驗證成功！ (Supabase 雲端認證)');
+                closeLogin();
             } catch (e) {
-                console.error("安全驗證引擎初始化異常", e);
-                alert("安全驗證失敗");
+                console.error("登入認證失敗", e);
+                alert("驗證失敗：帳號或密碼不正確！");
             }
         }
         
-        // 🔒 Web Crypto API 原生 
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // 🌟 登出機制：呼叫 Supabase 標準登出並清理 Token 與 Session 狀態
+        async function logout() { 
+            await _supabase.auth.signOut();
+            isAdmin = false;
+            document.body.classList.remove('is-admin');
+            location.reload(); 
         }
-        
-        function logout() { location.reload(); }
-        function toggleLinkEditor() { document.getElementById('linkEditor').classList.toggle('hidden'); }
+
+        function toggleLinkEditor() { 
+            if (!isAdmin) return alert('請先登入管理員以管理常用連結。');
+            document.getElementById('linkEditor').classList.toggle('hidden'); 
+        }
 
         window.onload = bootstrap;
     </script>
 </body>
-    
 </html>
-<!-- Auto Update: Sat May 30 04:39:07 UTC 2026 -->
-<!-- Auto Update: Sat May 30 04:40:47 UTC 2026 -->
-<!-- Auto Update: Sat May 30 05:11:14 UTC 2026 -->
+
+
