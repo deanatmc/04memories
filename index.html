@@ -408,7 +408,7 @@
         const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1dm95a2FsYmthbW9iY3dodnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2OTIxMTEsImV4cCI6MjA5MjI2ODExMX0.oa_7N40X-fV0Um47F5W_A7r_LCpua_A0H8bp900B1qg';
         const _supabase = supabase.createClient(S_URL, S_KEY);
 
-        // 🔒 加密儲存的管理員帳密明文混淆（採用 Base64 二進位字串）
+        // 🔒 加密儲存的管理員帳密明文混淆
         const _e = 'ZGVhbmF0bWNAZ21haWwuY29t'; // 解碼後為:？
         const _p = 'YWRtaW4wNEB0Y2pocw==';     // 解碼後為: ？
 
