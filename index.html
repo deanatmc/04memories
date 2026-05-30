@@ -200,8 +200,8 @@
             </div>
             <h1 class="text-5xl md:text-8xl lg:text-9xl font-black mb-6 tracking-tighter shimmer-text">青春編年史</h1>
             <p class="text-slate-400 text-sm md:text-2xl font-light tracking-[0.2em] max-w-2xl mx-auto leading-relaxed">
-               本站載入需要時間，請耐心等候。 <br>
-                時光荏苒，歲月如歌。那些藏在課桌椅間的秘密，都成了閃耀的星辰。
+                時光荏苒，歲月如歌。<br>
+                那些藏在課桌椅間的秘密，都成了閃耀的星辰。
             </p>
         </div>
     </header>
@@ -239,7 +239,6 @@
             </div>
 
             <div id="rosterGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 px-2">
-                <!-- 讀取中提示 -->
                 <div class="col-span-full py-12 text-center text-slate-500 text-xs tracking-widest">正在載入同學資料錄...</div>
             </div>
         </section>
@@ -315,7 +314,7 @@
             </div>
         </section>
 
-        <!-- 常用連結與時光留影 -->
+        <!-- 常用連結與心情留言板 -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-32">
             <!-- 常用連結 -->
             <section class="reveal lg:col-span-1">
@@ -362,7 +361,6 @@
                 <button onclick="closeBoard()" class="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white">✕</button>
             </div>
             <div class="flex-1 overflow-y-auto p-8 md:p-16">
-                <!-- 相簿管理面板，按鈕文字已加上 WebP 壓縮進度標示 -->
                 <div class="admin-section mb-12 max-w-xl mx-auto glass-card p-10 rounded-[2.5rem]">
                     <input type="file" id="fileInput" accept="image/*" multiple class="block w-full text-xs mb-6 text-slate-400">
                     <button onclick="submitMultipleItems()" id="uploadBtn" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase transition-all duration-300">上傳相片回憶 (無損壓縮為 WebP 格式)</button>
@@ -776,7 +774,7 @@
             }, 150);
         }
 
-        // 🌟 核心升級：前端 JavaScript 智慧 WebP 圖片規格壓縮演算法 🌟
+        // 🌟 前端 JavaScript WebP 圖片規格壓縮演算法 🌟
         async function submitMultipleItems() {
             const fileInput = document.getElementById('fileInput');
             const files = fileInput.files;
@@ -791,7 +789,6 @@
                 uploadBtn.innerText = `正在壓縮第 ${i+1}/${files.length} 張相片...`;
 
                 try {
-                    // 執行前端圖片高畫質 WebP 壓縮：最大寬度 1440px，高畫質係數 0.75
                     const compressedBlob = await compressImageToWebP(file, 1440, 0.75);
                     const path = `img_${Date.now()}_${Math.random().toString(36).substr(2,5)}.webp`;
 
@@ -805,7 +802,6 @@
                     }
                 } catch (compressErr) {
                     console.error("WebP 壓縮失敗，自動啟動 JPEG 安全防護上傳", compressErr);
-                    // 備用防護：若瀏覽器對 WebP 核心不相容，改用原相上傳
                     const path = `img_${Date.now()}_${Math.random().toString(36).substr(2,5)}`;
                     const { error } = await _supabase.storage.from('photos').upload(path, file);
                     if (!error) {
@@ -821,7 +817,6 @@
             }, 800);
         }
 
-        // 🖼️ 核心演算法：HTML5 Canvas 智慧圖片轉 WebP 格式機制 🖼️
         function compressImageToWebP(file, maxWidth, quality) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -845,12 +840,10 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // 先嘗試導出為現代 WebP 格式
                         canvas.toBlob((blob) => {
                             if (blob) {
                                 resolve(blob);
                             } else {
-                                // 若不支援，降級改為相容性 JPEG 格式
                                 canvas.toBlob((fallbackBlob) => {
                                     if (fallbackBlob) resolve(fallbackBlob);
                                     else reject(new Error("Canvas Image Blob 轉換失敗"));
@@ -869,16 +862,44 @@
         function openLogin() { document.getElementById('loginModal').classList.remove('hidden'); }
         function closeLogin() { document.getElementById('loginModal').classList.add('hidden'); }
         
-        function verifyLogin() { 
-            if(document.getElementById('adminPass').value === 'admin04') { 
-                document.body.classList.add('is-admin'); 
-                document.querySelectorAll('.admin-section').forEach(el => {
-                    el.style.setProperty('display', 'block', 'important');
-                });
-                closeLogin(); 
-            } else { 
-                alert('驗證失敗'); 
-            } 
+        // 🌟 雙重 SHA-256 加密驗證演算法核心 🌟
+        async function verifyLogin() { 
+            const userPasswordInput = document.getElementById('adminPass').value;
+            
+            // 專屬安全鹽值 (Salt)，避免遭到彩虹表暴力破解
+            const salt = "04ChronicleSalt2026";
+            
+            try {
+                // 1. 執行第一次密碼雜湊運算
+                const firstHash = await sha256(userPasswordInput);
+                // 2. 將第一階段產生的字串，接上鹽值，進行第二次雜湊運算
+                const finalHash = await sha256(firstHash + salt);
+                
+                // 3. 與雙重加密後的終極安全密文進行比對
+                // 此安全密文對應原始密碼 "admin04"
+                const secureTargetHex = "42be8b7b7be3589b25f6eb6e6792688b598bfe1b9d4e51bf493f0b016fdf9e2c";
+                
+                if (finalHash === secureTargetHex) { 
+                    document.body.classList.add('is-admin'); 
+                    document.querySelectorAll('.admin-section').forEach(el => {
+                        el.style.setProperty('display', 'block', 'important');
+                    });
+                    closeLogin(); 
+                } else { 
+                    alert('驗證失敗'); 
+                } 
+            } catch (e) {
+                console.error("安全驗證引擎初始化異常", e);
+                alert("安全驗證失敗");
+            }
+        }
+        
+        // 🔒 Web Crypto API 原生 SHA-256 位元轉換演算法
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
         
         function logout() { location.reload(); }
@@ -887,8 +908,5 @@
         window.onload = bootstrap;
     </script>
 </body>
+    
 </html>
-<!-- Auto Update: Fri May 29 12:31:20 UTC 2026 -->
-<!-- Auto Update: Fri May 29 13:56:04 UTC 2026 -->
-<!-- Auto Update: Sat May 30 02:55:35 UTC 2026 -->
-<!-- Auto Update: Sat May 30 02:57:13 UTC 2026 -->
