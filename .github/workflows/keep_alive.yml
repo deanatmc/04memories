@@ -1,15 +1,25 @@
+# =================================================================
+# 青春編年史 - 專案守護者自動化腳本 (Keep Alive & Auto Update)
+# 
+# 作用：
+# 1. 每 6 小時自動修改 index.html 產生 Git 變動並推回，防止 GitHub Pages 閒置過期。
+# 2. 自動造訪正式網頁，向 GitHub Pages 伺服器註冊流量。
+# 3. 定期呼叫 Supabase API 進行資料存取，100% 避免資料庫因超過一週無人造訪而進入休眠。
+# =================================================================
+
 name: Keep Alive and Auto Update
 
 on:
   push:
     branches: [ main ]
   schedule:
-    # 每天凌晨 0 點執行一次 (UTC 0:00)
-    - cron: '0 0 * * *' 
-  workflow_dispatch:      # 提供手動測試按鈕
+    # 🎯 每 6 小時執行一次 (每天 00:00, 06:00, 12:00, 18:00 UTC)
+    # 這能確保資料庫與網頁永遠維持最快的回應速度
+    - cron: '0 */6 * * *' 
+  workflow_dispatch:      # 啟用手動執行按鈕，隨時可以在 GitHub Actions 頁面手動測試跑一次
 
-# 依據 GitHub 2026 官方最新規範設定環境變數：
-# 強制將 Actions 執行環境升級至 Node 24，避免 Node 20 淘汰警告並提早安全遷移
+# 強制將 Actions 執行環境中所有底層的 JavaScript 行動升級至 Node 24
+# 這是 GitHub 官方 2026 年最新規範，能徹底消除 Node 20 淘汰警告
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
@@ -17,40 +27,47 @@ jobs:
   update-and-ping:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write     # 賦予腳本寫入與推回（Push）程式碼至儲存庫的權限
     steps:
+      # 1. 簽出（Checkout）目前的程式碼
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      # 2. 設定虛擬環境的 Git 使用者身分，以 Actions Bot 的身分提交
       - name: Setup Git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
+      # 3. 在 index.html 檔案的最末尾附加一個含有目前時間的 HTML 註解
+      # 這會產生一個微小但有效的檔案修改，確保網頁始終保持最新狀態
       - name: Update index.html (Keep Alive Tag)
         run: |
-          # 在 index.html 末尾附加時間戳記，確保產生 git 變動
           if [ -f index.html ]; then
             echo "<!-- Auto Update: $(date) -->" >> index.html
           fi
 
+      # 4. 將修改後的 index.html 提交（Commit）並推回（Push）至 GitHub
+      # 使用 [skip ci] 標籤來防止因自動提交而觸發無限循環的 Actions 流程
       - name: Commit and Push
         run: |
           git add index.html
-          # 只有在有變動時才 commit，避免重複報錯
           git commit -m "chore: nightly keep-alive update [skip ci]" || exit 0
           git push origin main
 
+      # 5. 使用 curl 模仿瀏覽器存取正式的新網址，向 GitHub Pages 伺服器發送註冊流量
       - name: Ping Live Website
         run: |
-          # 訪問你的正式網頁，確保 GitHub Pages 服務器紀錄流量
-          curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" -L "https://deanatmc.github.io/photos_html/" --silent --output /dev/null
+          curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" \
+          -L "https://deanatmc.github.io/04memories/" \
+          --silent --output /dev/null
 
+      # 6. 直接發送請求至你的 Supabase REST API 讀取一筆回憶紀錄
+      # 這會定期戳醒你的 Supabase，確保它永久不會被官方判定為閒置而暫停服務
       - name: Ping Supabase Database
         run: |
-          # 直接對你的 Supabase API 發送請求，雙重保險防止資料庫休眠
           curl -X GET "https://huvoykalbkamobcwhvrl.supabase.co/rest/v1/memories?select=id&limit=1" \
           -H "apikey: ${{ secrets.SB_KEY }}" \
           -H "Authorization: Bearer ${{ secrets.SB_KEY }}" \
