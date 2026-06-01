@@ -407,39 +407,6 @@
         let activeLightboxPhotos = [];
         let activeLightboxIndex = 0;
 
-        // 🌟 29 位同學預設資料庫 🌟
-        const defaultRosterData = [
-            { name: '王勻妤', bg: 'from-blue-500 to-indigo-500', char: '王', social_type: 'instagram', social_url: 'https://www.instagram.com/carey107066/' },
-            { name: '潘宥澄', bg: 'from-blue-500 to-indigo-500', char: '潘', social_type: 'instagram', social_url: 'https://www.instagram.com/008787q/' },
-            { name: '余秉霖', bg: 'from-blue-500 to-indigo-500', char: '余', social_type: 'instagram', social_url: 'https://www.instagram.com/ling_.1001/' },
-            { name: '吳沛萱', bg: 'from-blue-500 to-indigo-500', char: '吳', social_type: 'instagram', social_url: 'https://www.instagram.com/c.yg___8/' },
-            { name: '李承峻', bg: 'from-blue-500 to-indigo-500', char: '李', social_type: 'instagram', social_url: 'https://www.instagram.com/cheng.jun_917/' },
-            { name: '林子恩', bg: 'from-blue-500 to-indigo-500', char: '林', social_type: 'instagram', social_url: 'https://www.instagram.com/peterl000915/' },
-            { name: '林威佑', bg: 'from-blue-500 to-indigo-500', char: '林', social_type: 'facebook', social_url: 'https://www.facebook.com/share/17tzWcEuTL/?mibextid=wwXIfr' },
-            { name: '林夏平', bg: 'from-blue-500 to-indigo-500', char: '林', social_type: 'instagram', social_url: 'https://www.instagram.com/popcat139722' },
-            { name: '洪于婕', bg: 'from-blue-500 to-indigo-500', char: '洪', social_type: 'instagram', social_url: 'https://www.instagram.com/419.yumi_/' },
-            { name: '洪秉維', bg: 'from-blue-500 to-indigo-500', char: '洪', social_type: 'instagram', social_url: 'https://www.instagram.com/fxuxifxfixtkxfix/' },
-            { name: '曹🐽🍋', bg: 'from-blue-500 to-indigo-500', char: '曹', social_type: 'instagram', social_url: 'https://www.instagram.com/amy0830_/' },
-            { name: '郭芮君', bg: 'from-blue-500 to-indigo-500', char: '郭', social_type: 'instagram', social_url: 'https://www.instagram.com/_cuzxy/' },
-            { name: '郭佑凱', bg: 'from-blue-500 to-indigo-500', char: '郭', social_type: 'instagram', social_url: 'https://www.instagram.com/kaibaoguo/' },
-            { name: '陳佩琪', bg: 'from-blue-500 to-indigo-500', char: '陳', social_type: 'instagram', social_url: 'https://www.instagram.com/chenqiqi627/' },
-            { name: '黃炯勳', bg: 'from-blue-500 to-indigo-500', char: '黃', social_type: 'instagram', social_url: 'https://www.instagram.com/jiong_16xun/' },
-            { name: '黃語飛', bg: 'from-blue-500 to-indigo-500', char: '黃', social_type: 'instagram', social_url: 'https://www.instagram.com/felix70417/' },
-            { name: '楊可威', bg: 'from-blue-500 to-indigo-500', char: '楊', social_type: 'instagram', social_url: 'https://www.instagram.com/kewei_1216/' },
-            { name: '葉翼齊', bg: 'from-blue-500 to-indigo-500', char: '葉', social_type: 'facebook', social_url: 'https://www.facebook.com/share/1D1PGgppKs/?mibextid=wwXIfr' },
-            { name: '潘瑋', bg: 'from-blue-500 to-indigo-500', char: '潘', social_type: 'instagram', social_url: 'https://www.instagram.com/q.p.army/' },
-            { name: '蔡上元', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/ryan.8146422/' },
-            { name: '蔡承希', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/_c3lyra/' },
-            { name: '蔡承起', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/jfhljq321_0726/' },
-            { name: '蔡侑哲', bg: 'from-blue-500 to-indigo-500', char: '蔡', social_type: 'instagram', social_url: 'https://www.instagram.com/eitb29/' },
-            { name: '鄭迪恩', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/di_en_zheng/' },
-            { name: '錢佑助', bg: 'from-blue-500 to-indigo-500', char: '錢', social_type: 'instagram', social_url: 'https://www.instagram.com/qianyouzhu7/' },
-            { name: '謝佳賢', bg: 'from-blue-500 to-indigo-500', char: '謝', social_type: 'instagram', social_url: 'https://www.instagram.com/7zxxu9/' },
-            { name: '蘇嘉豪', bg: 'from-blue-500 to-indigo-500', char: '蘇', social_type: 'instagram', social_url: 'https://www.instagram.com/sujiahao8964/' },
-            { name: '鄭玉歆', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/yx._.10_12/' },
-            { name: '鄭令泉', bg: 'from-blue-500 to-indigo-500', char: '鄭', social_type: 'instagram', social_url: 'https://www.instagram.com/cuang_0421/' }
-        ];
-
         async function bootstrap() {
             try {
                 const isAction = navigator.userAgent.includes('GitHub');
